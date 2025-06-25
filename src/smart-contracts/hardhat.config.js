@@ -1,18 +1,24 @@
 require("@nomicfoundation/hardhat-toolbox");
 
+/** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: "0.8.28",
   networks: {
     besu: {
-      setTimeout: 200000, // 200 seconds
-  url: "http://localhost:8545",
-  accounts: [
-    "0x8f2a55949018a6a6823bf6ef1b3262c1b5fc313bcd99e5e9d6a6c3b6d0a7e3cc"
-  ],
-  chainId: 1337,        // dev mode default
-  gas: 3000000,         // fixed gas value
-  gasPrice: 0           // Besu in dev mode doesn't charge gas
-}
-
-  }
+      url: "http://localhost:8545", // Your Besu RPC URL
+      accounts: [
+        // Add multiple private keys here
+        "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63", // Your current account
+        "0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3", // Additional account 1
+        "0xae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f", // Additional account 2
+      ],
+      chainId: 1337, // Adjust based on your Besu setup
+      gasPrice: 0,
+      gas: 6000000,
+    },
+    // Keep your other networks
+    localhost: {
+      url: "http://127.0.0.1:8545"
+    }
+  },
 };
