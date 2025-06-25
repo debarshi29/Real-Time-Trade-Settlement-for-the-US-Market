@@ -1,0 +1,15 @@
+{
+  "network": "besu",
+  "deployer": "0x5F1B602980Be5dd0AcEADf37C579B2EB1c076f9c",
+  "contracts": {
+    "TokenizedCash": {
+      "address": "0xF5f0b6c754226E67B723226C72d9451f9E2b68B5",
+      "verified": true
+    },
+    "AtomicSwap": {
+      "address": "0xdF65C3d00b1021Fd667831D79915cB0321915AbC",
+      "verified": true
+    }
+  },
+  "timestamp": "2025-06-18T05:56:40.557Z"
+}
