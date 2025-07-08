@@ -1,0 +1,5 @@
+# Use LF for all text files in the repo
+* text=auto
+
+# Force JSON files to always use LF (Unix style)
+*.json text eol=lf
