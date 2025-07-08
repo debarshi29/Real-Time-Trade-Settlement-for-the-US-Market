@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  node1:
+    image: hyperledger/besu:latest
+    container_name: besu-node1
+    networks:
+      besu:
+        ipv4_address: 172.16.239.11
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+      - "30303:30303"
+    volumes:
+      - ./node1:/opt/besu/data
+      - ./genesis:/opt/besu/genesis
+      - ./node1/static-nodes.json:/opt/besu/data/static-nodes.json
+    command: >
+      --data-path=/opt/besu/data
+      --genesis-file=/opt/besu/genesis/genesis.json
+      --network-id=1337
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8545
+      --rpc-http-cors-origins=all
+      --rpc-http-api=ETH,NET,WEB3,IBFT,ADMIN,DEBUG
+      --rpc-ws-enabled
+      --rpc-ws-host=0.0.0.0
+      --rpc-ws-port=8546
+      --p2p-port=30303
+      --host-allowlist=*
+      --miner-enabled
+      --miner-coinbase=0xfe3b557e8fb62b89f4916b721be55ceb828dbd73
+
+  node2:
+    image: hyperledger/besu:latest
+    container_name: besu-node2
+    networks:
+      besu:
+        ipv4_address: 172.16.239.12
+    ports:
+      - "8547:8545"
+      - "8548:8546"
+      - "30304:30304"
+    volumes:
+      - ./node2:/opt/besu/data
+      - ./genesis:/opt/besu/genesis
+      - ./node2/static-nodes.json:/opt/besu/data/static-nodes.json
+    command: >
+      --data-path=/opt/besu/data
+      --genesis-file=/opt/besu/genesis/genesis.json
+      --network-id=1337
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8545
+      --rpc-http-cors-origins=all
+      --rpc-http-api=ETH,NET,WEB3,IBFT,ADMIN,DEBUG
+      --rpc-ws-enabled
+      --rpc-ws-host=0.0.0.0
+      --rpc-ws-port=8546
+      --p2p-port=30304
+      --host-allowlist=*
+      --miner-enabled
+      --miner-coinbase=0xa50a51c09a5c451c52bb714527e1974b686d8e77
+
+  node3:
+    image: hyperledger/besu:latest
+    container_name: besu-node3
+    networks:
+      besu:
+        ipv4_address: 172.16.239.13
+    ports:
+      - "8549:8545"
+      - "8550:8546"
+      - "30305:30305"
+    volumes:
+      - ./node3:/opt/besu/data
+      - ./genesis:/opt/besu/genesis
+      - ./node3/static-nodes.json:/opt/besu/data/static-nodes.json
+    command: >
+      --data-path=/opt/besu/data
+      --genesis-file=/opt/besu/genesis/genesis.json
+      --network-id=1337
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8545
+      --rpc-http-cors-origins=all
+      --rpc-http-api=ETH,NET,WEB3,IBFT,ADMIN,DEBUG
+      --rpc-ws-enabled
+      --rpc-ws-host=0.0.0.0
+      --rpc-ws-port=8546
+      --p2p-port=30305
+      --host-allowlist=*
+      --miner-enabled
+      --miner-coinbase=0x5b9d1e2308f3a9f8e7c6d5b4a39281e0f6c3849d
+
+  node4:
+    image: hyperledger/besu:latest
+    container_name: besu-node4
+    networks:
+      besu:
+        ipv4_address: 172.16.239.14
+    ports:
+      - "8551:8545"
+      - "8552:8546"
+      - "30306:30306"
+    volumes:
+      - ./node4:/opt/besu/data
+      - ./genesis:/opt/besu/genesis
+      - ./node4/static-nodes.json:/opt/besu/data/static-nodes.json
+    command: >
+      --data-path=/opt/besu/data
+      --genesis-file=/opt/besu/genesis/genesis.json
+      --network-id=1337
+      --rpc-http-enabled
+      --rpc-http-host=0.0.0.0
+      --rpc-http-port=8545
+      --rpc-http-cors-origins=all
+      --rpc-http-api=ETH,NET,WEB3,IBFT,ADMIN,DEBUG
+      --rpc-ws-enabled
+      --rpc-ws-host=0.0.0.0
+      --rpc-ws-port=8546
+      --p2p-port=30306
+      --host-allowlist=*
+      --miner-enabled
+      --miner-coinbase=0x1234567890abcdef1234567890abcdef12345678
+
+networks:
+  besu:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.239.0/24

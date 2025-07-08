@@ -7,8 +7,13 @@ requires-python = ">=3.10"
 dependencies = [
     "generativeai>=0.0.1",
     "google-generativeai>=0.8.5",
-    "langchain>=0.3.25",
+    "langchain[google-genai]>=0.3.25",
     "langgraph>=0.4.8",
+    "langsmith>=0.3.45",
+    "mcp[cli]>=1.10.1",
+    "openai>=1.93.0",
     "pandas>=2.3.0",
+    "python-dotenv>=1.1.1",
+    "smolagents[litellm,mcp]>=1.19.0",
     "web3>=7.12.0",
 ]

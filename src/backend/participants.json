@@ -1,0 +1,22 @@
+[
+  {
+    "role": "buyer",
+    "address": "0x59b5D0A361b6Cd8Cc22e21bE74f2Dc387f75E9A6",
+    "private_key": "fbd284a7fd21c151d7918c55a4e858256f814a9cccb9103f340b52b6bec4f097"
+  },
+  {
+    "role": "buyer",
+    "address": "0xd9f64a61E2F822B6aF88ffb34C436D9A600A2De9",
+    "private_key": "6da6eeba9ac03b5d4861c9343b1877a8ab5429a198dbdec6a70311aaf6b2a3f4"
+  },
+  {
+    "role": "seller",
+    "address": "0xA5F05C523aF62ea507a90E78605e2a1796B2c801",
+    "private_key": "7152c5471417dc7afb345a816bd1ff887b094cabc81a2de65d5d92c16ae14e51"
+  },
+  {
+    "role": "seller",
+    "address": "0x264B3334C9e6997534ccd403099eD8BFC43fb3F9",
+    "private_key": "aa7e3e4a2fb2bdc245cb8d92cd51247ac5cd715f03057075d6ee1f127ae7d7dd"
+  }
+]
