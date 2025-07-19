@@ -3,85 +3,112 @@ import json
 
 # === CONFIG ===
 WEB3_PROVIDER = "http://localhost:8545"
+CHAIN_ID = 1981
 
-TOKENIZED_CASH = "0xa9ECbe3F9600f9bF3ec88a428387316714ac95a0"
-TOKENIZED_SEC = "0x2114De86c8Ea1FD8144C2f1e1e94C74E498afB1b"
+# === Load latest deployed addresses ===
+with open("../smart-contracts/deployed-addresses.json") as f:
+    addresses = json.load(f)
+TOKENIZED_CASH = Web3.to_checksum_address(addresses["TokenizedCash"])
+TOKENIZED_SEC = Web3.to_checksum_address(addresses["TokenizedSecurity"])
 
-ABI_CASH_PATH =r"../smart-contracts/artifacts/contracts/TokenizedCash.sol/TokenizedCash.json"
-ABI_SEC_PATH = r"../smart-contracts/artifacts/contracts/TokenizedSecurity.sol/TokenizedSecurity.json"
-
-# Admin account
-ADMIN_ADDRESS = "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73"
-ADMIN_PRIVATE_KEY = "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113b37c6d3d8b3f0f10c5c8cefb"
-
-
-# === Accounts to fund ===
+# === Participants (buyers get TCASH, sellers get TSEC) ===
 accounts = [
-    {
-        "role": "buyer",
-        "address": "0x59b5D0A361b6Cd8Cc22e21bE74f2Dc387f75E9A6",
-    },
-    {
-        "role": "buyer",
-        "address": "0xd9f64a61E2F822B6aF88ffb34C436D9A600A2De9",
-    },
-    {
-        "role": "seller",
-        "address": "0xA5F05C523aF62ea507a90E78605e2a1796B2c801",
-    },
-    {
-        "role": "seller",
-        "address": "0x264B3334C9e6997534ccd403099eD8BFC43fb3F9",
-    },
+    {"role": "buyer", "address": "0x59b5D0A361b6Cd8Cc22e21bE74f2Dc387f75E9A6"},
+    {"role": "buyer", "address": "0xd9f64a61E2F822B6aF88ffb34C436D9A600A2De9"},
+    {"role": "seller", "address": "0xA5F05C523aF62ea507a90E78605e2a1796B2c801"},
+    {"role": "seller", "address": "0x264B3334C9e6997534ccd403099eD8BFC43fb3F9"},
 ]
 
-# === Setup Web3 ===
+# === Admin ===
+ADMIN_PRIVATE_KEY = "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
 w3 = Web3(Web3.HTTPProvider(WEB3_PROVIDER))
+ADMIN_ADDRESS = w3.eth.account.from_key(ADMIN_PRIVATE_KEY).address
 
 # === Load ABIs ===
-# === Load ABIs ===
-with open(ABI_CASH_PATH) as f:
-    abi_cash = json.load(f)["abi"]  
-with open(ABI_SEC_PATH) as f:
-    abi_sec = json.load(f)["abi"]   
-
+with open("../smart-contracts/artifacts/contracts/TokenizedCash.sol/TokenizedCash.json") as f:
+    abi_cash = json.load(f)["abi"]
+with open("../smart-contracts/artifacts/contracts/TokenizedSecurity.sol/TokenizedSecurity.json") as f:
+    abi_sec = json.load(f)["abi"]
 
 cash_token = w3.eth.contract(address=TOKENIZED_CASH, abi=abi_cash)
 sec_token = w3.eth.contract(address=TOKENIZED_SEC, abi=abi_sec)
 
-# === Funding Function ===
-def send_tokens(token_contract, to_address, amount_wei, nonce):
-    tx = token_contract.functions.transfer(to_address, amount_wei).build_transaction({
-        'from': ADMIN_ADDRESS,
-        'nonce': nonce,
-        'gas': 200000,
-        'gasPrice': w3.to_wei('0', 'gwei')  # zero gas for dev
+# === Utility: Send TX ===
+def send_tx(fn, nonce):
+    tx = fn.build_transaction({
+        "from": ADMIN_ADDRESS,
+        "nonce": nonce,
+        "gas": 500_000,
+        "gasPrice": 0,
+        "chainId": CHAIN_ID,
     })
     signed = w3.eth.account.sign_transaction(tx, private_key=ADMIN_PRIVATE_KEY)
-    tx_hash = w3.eth.send_raw_transaction(signed.rawTransaction)
-    return tx_hash
+    tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+    if receipt.status == 1:
+        print(f"✅ Transaction successful in block {receipt.blockNumber}")
+    else:
+        print(f"❌ Transaction failed in block {receipt.blockNumber}")
+        raise Exception("Transaction failed")
+    return receipt
 
-# === MAIN ===
+# === Diagnostics ===
+decimals_cash = cash_token.functions.decimals().call()
+decimals_sec = sec_token.functions.decimals().call()
+admin_balance_cash = cash_token.functions.balanceOf(ADMIN_ADDRESS).call()
+admin_balance_sec = sec_token.functions.balanceOf(ADMIN_ADDRESS).call()
+print("🧮 Admin Balances:")
+print(f"   TCASH: {admin_balance_cash / (10 ** decimals_cash)}")
+print(f"   TSEC:  {admin_balance_sec / (10 ** decimals_sec)}")
+print("Total supply (TCASH):", cash_token.functions.totalSupply().call() / (10 ** decimals_cash))
+print(f"Admin address: {ADMIN_ADDRESS}")
+print(f"Admin ETH: {w3.from_wei(w3.eth.get_balance(ADMIN_ADDRESS), 'ether')}")
+
+# === Role Checks ===
+owner_cash = cash_token.functions.owner().call()
+print(f"TCASH contract owner: {owner_cash}")
+if owner_cash.lower() != ADMIN_ADDRESS.lower():
+    print("⚠️ Admin is NOT the TCASH contract owner!")
+
+ISSUER_ROLE = w3.keccak(text="ISSUER_ROLE")
+has_issuer_role = sec_token.functions.hasRole(ISSUER_ROLE, ADMIN_ADDRESS).call()
+print(f"Admin has ISSUER_ROLE for TSEC: {has_issuer_role}")
+if not has_issuer_role:
+    print("⚠️ Admin lacks ISSUER_ROLE for TSEC!")
+
+# === Start Funding ===
 print("🚀 Starting funding process...")
-
-amount_cash = w3.to_wei(1000, 'ether')
-amount_sec = w3.to_wei(100, 'ether')
-
 nonce = w3.eth.get_transaction_count(ADMIN_ADDRESS)
 
-for acc in accounts:
-    addr = acc["address"]
-    role = acc["role"]
+# Mint TCASH to admin if needed
+if admin_balance_cash < 4000 * (10 ** decimals_cash):
+    print(f"💰 Minting 5000 TCASH to admin...")
+    receipt = send_tx(cash_token.functions.mint(ADMIN_ADDRESS, 5000 * (10 ** decimals_cash)), nonce)
+    nonce += 1
+else:
+    print("✅ Admin already has sufficient TCASH")
 
+# Distribute TCASH and TSEC to accounts
+for acc in accounts:
+    addr = Web3.to_checksum_address(acc["address"])
+    role = acc["role"]
     if role == "buyer":
-        print(f"💸 Sending $1000 to buyer {addr}...")
-        tx_hash = send_tokens(cash_token, addr, amount_cash, nonce)
-        w3.eth.wait_for_transaction_receipt(tx_hash)
+        print(f"💸 Sending 1000 TCASH to buyer {addr}...")
+        receipt = send_tx(cash_token.functions.transfer(addr, 1000 * (10 ** decimals_cash)), nonce)
         nonce += 1
     elif role == "seller":
-        print(f"📈 Sending 100 sec tokens to seller {addr}...")
-        tx_hash = send_tokens(sec_token, addr, amount_sec, nonce)
-        w3.eth.wait_for_transaction_receipt(tx_hash)
+        print(f"📈 Minting 100 TSEC to seller {addr}...")
+        receipt = send_tx(sec_token.functions.mint(addr, 100 * (10 ** decimals_sec)), nonce)
         nonce += 1
 
-print("✅ All accounts funded successfully.")
+# === Final Balances ===
+print("\n🔍 Final Balances:")
+for acc in accounts:
+    addr = Web3.to_checksum_address(acc["address"])
+    bal_cash = cash_token.functions.balanceOf(addr).call()
+    bal_sec = sec_token.functions.balanceOf(addr).call()
+    print(f"   {addr}:")
+    print(f"     TCASH: {bal_cash / (10 ** decimals_cash)}")
+    print(f"     TSEC:  {bal_sec / (10 ** decimals_sec)}")
+
+print("\n✅ All accounts funded successfully.")

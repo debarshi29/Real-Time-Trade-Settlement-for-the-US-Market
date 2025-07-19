@@ -1,10 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenizedCash is ERC20 {
-    constructor(uint256 initialSupply) ERC20("TokenizedCash", "TCASH") {
-        _mint(msg.sender, initialSupply);
+contract TokenizedCash is ERC20, Ownable {
+    constructor(uint256 initialSupply) 
+        ERC20("TokenizedCash", "TCASH") 
+        Ownable(msg.sender) 
+    {
+        _mint(msg.sender, initialSupply * 1e18);
+    }
+    
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
     }
 }

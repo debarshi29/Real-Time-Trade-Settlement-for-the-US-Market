@@ -1,4 +1,6 @@
 // simple_deploy.js - Clean deployment without complex gas settings
+const { ethers } = require("hardhat");
+
 async function main() {
     console.log("🚀 SIMPLE CONTRACT DEPLOYMENT");
     console.log("==============================");
@@ -96,6 +98,8 @@ async function main() {
         const totalSupply = await tokenizedSecurity.totalSupply();
         const deployerBalance = await tokenizedSecurity.balanceOf(deployer.address);
         
+
+        console.log("Deployer Address:", deployer.address);
         console.log("✅ ERC20 functions working:");
         console.log("   📛 Name:", name);
         console.log("   🔤 Symbol:", symbol);
