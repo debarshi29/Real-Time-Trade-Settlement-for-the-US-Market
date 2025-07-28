@@ -53,6 +53,27 @@ def log_balances(buyer, seller):
     print(f"📊 Buyer Cash: {Web3.from_wei(buyer_cash, 'ether')} | Buyer Sec: {Web3.from_wei(buyer_sec, 'ether')}")
     print(f"📊 Seller Cash: {Web3.from_wei(seller_cash, 'ether')} | Seller Sec: {Web3.from_wei(seller_sec, 'ether')}")
 
+def display_llm_analysis(result):
+    """Display the LLM analysis in a formatted way"""
+    print(f"\n🤖 LLM ANALYSIS:")
+    print(f"   📅 Timestamp: {result.get('trade_timestamp', 'N/A')}")
+    
+    if result.get('approved'):
+        print(f"   ✅ Status: APPROVED")
+    else:
+        print(f"   ❌ Status: REJECTED")
+    
+    print(f"   📝 Summary: {result.get('summary', 'No summary available')}")
+    print(f"   🔍 Reason: {result.get('reason', 'No reason provided')}")
+    
+    # Display validation details
+    if result.get('balance'):
+        print(f"   💰 Balance Check: {result.get('balance')}")
+    if result.get('risk'):
+        print(f"   ⚠️  Risk Assessment: {result.get('risk')}")
+    
+    print("-" * 80)
+
 # === Simulation ===
 def simulate_market_tick():
     seller = random.choice(sellers)
@@ -64,7 +85,7 @@ def simulate_market_tick():
 
     print(f"\n📈 Trade Attempt: {buyer['address']} buys {shares} shares from {seller['address']} @ {price_per_share} = ${total_price}")
 
-    # === Validate ===
+    # === Validate with AI Agent ===
     result = agent.assess_trade(
         trader_cash=buyer["address"],
         trader_sec=seller["address"],
@@ -72,12 +93,20 @@ def simulate_market_tick():
         required_sec=Web3.to_wei(shares, "ether")
     )
 
+    # === Display AI Analysis ===
+    display_llm_analysis(result)
+
+    # === Check if trade is approved ===
     if not result["approved"]:
-        print(f"❌ Trade Rejected: {result['reason']}")
+        print(f"🚫 Trade Not Executed - Validation Failed")
+        print("=" * 80)
         return
 
+    # === Execute Trade (only if approved) ===
     try:
-    # === Approve TCASH (Buyer) ===
+        print("🔄 Executing approved trade...")
+        
+        # === Approve TCASH (Buyer) ===
         nonce_buyer = w3.eth.get_transaction_count(buyer["address"])
         tx1 = cash_token.functions.approve(
             ATOMIC_SWAP, Web3.to_wei(total_price, "ether")
@@ -167,14 +196,20 @@ def simulate_market_tick():
         tx_hash6 = w3.eth.send_raw_transaction(signed6.raw_transaction)
         receipt_execute = w3.eth.wait_for_transaction_receipt(tx_hash6)
 
-        print("✅ Trade Executed:", receipt_execute.transactionHash.hex())
+        print("✅ Trade Executed Successfully!")
+        print(f"   Transaction Hash: {receipt_execute.transactionHash.hex()}")
+        print(f"   Trade ID: {trade_id}")
         log_balances(buyer, seller)
 
     except Exception as e:
-        print("❌ Transaction failed:", str(e))
+        print(f"❌ Transaction failed: {str(e)}")
+    
+    print("=" * 80)
+
 # === Loop ===
 if __name__ == "__main__":
-    print("🔁 Starting Market Simulation (Ctrl+C to stop)...")
+    print("🔁 Starting Market Simulation with AI Validation (Ctrl+C to stop)...")
+    print("=" * 80)
     try:
         while True:
             simulate_market_tick()

@@ -6,12 +6,12 @@ import os
 import json
 from typing import TypedDict
 from dotenv import load_dotenv
+from datetime import datetime
 load_dotenv()
 
 # === GOOGLE GEMINI API KEY ===
 api_key = os.getenv("GOOGLE_API_KEY")
 
-# === Trade State ===
 class TradeState(TypedDict):
     party_cash: str
     party_sec: str
@@ -24,6 +24,7 @@ class TradeState(TypedDict):
     approved: bool
     summary: str
     reason: str
+    trade_timestamp: str
 
 # === TOOLS ===
 def check_balance(state: dict) -> str:
@@ -69,17 +70,25 @@ def risk_filter(state: dict) -> str:
 # === Tool Wrappers ===
 def run_check_balance(state: TradeState):
     result = check_balance(state)
-    return {**state, "balance": result}
+    # Add timestamp when balance check is performed
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return {**state, "balance": result, "trade_timestamp": timestamp}
 
 def run_risk_filter(state: TradeState):
     result = risk_filter(state)
     return {**state, "risk": result}
 
-# === LLM Summary ===
 def generate_llm_summary(state: TradeState):
     llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0, google_api_key=api_key)
-    prompt = f"""A trade has been rejected. Here are the trade details:
+    
+    # Use the approved status to determine the prompt
+    trade_timestamp = state.get("trade_timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    approved = state.get("approved", False)
+    
+    if approved:
+        prompt = f"""A trade has been APPROVED. Here are the trade details:
 
+Trade Date & Time: {trade_timestamp}
 - party_cash: {state.get('party_cash')}
 - party_sec: {state.get('party_sec')}
 - amount_cash: {state.get('required_cash')}
@@ -87,11 +96,23 @@ def generate_llm_summary(state: TradeState):
 - balance_status: {state.get('balance')}
 - risk_status: {state.get('risk')}
 
-Please explain concisely why this trade was rejected."""
-    response = llm.invoke(prompt)
-    return {**state, "summary": response.content, "approved": False}
+Please explain concisely why this trade was approved and summarize the successful validation checks."""
+    else:
+        prompt = f"""A trade has been REJECTED. Here are the trade details:
 
-# === Routing Logic ===
+Trade Date & Time: {trade_timestamp}
+- party_cash: {state.get('party_cash')}
+- party_sec: {state.get('party_sec')}
+- amount_cash: {state.get('required_cash')}
+- amount_sec: {state.get('required_sec')}
+- balance_status: {state.get('balance')}
+- risk_status: {state.get('risk')}
+
+Please explain concisely why this trade was rejected and which validation checks failed."""
+    
+    response = llm.invoke(prompt)
+    return {**state, "summary": response.content}
+
 def decision_router(state: TradeState):
     balance_status = state.get("balance")
     risk_status = state.get("risk")
@@ -115,7 +136,6 @@ def reject(state: TradeState):
     reason = "; ".join(reasons) if reasons else "Trade rejected"
     return {**state, "approved": False, "reason": reason}
 
-# === Graph Builder ===
 def build_trade_validator():
     graph = StateGraph(TradeState)
 
@@ -133,10 +153,10 @@ def build_trade_validator():
         decision_router,
         {
             "approve": "approve",
-            "reject": "generate_llm_summary"
+            "reject": "reject"
         }
     )
-
-    graph.add_edge("generate_llm_summary", "reject")
+    graph.add_edge("approve", "generate_llm_summary")
+    graph.add_edge("reject", "generate_llm_summary")
 
     return graph.compile()

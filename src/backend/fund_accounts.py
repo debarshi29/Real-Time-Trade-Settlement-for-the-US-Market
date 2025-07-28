@@ -11,13 +11,9 @@ with open("../smart-contracts/deployed-addresses.json") as f:
 TOKENIZED_CASH = Web3.to_checksum_address(addresses["TokenizedCash"])
 TOKENIZED_SEC = Web3.to_checksum_address(addresses["TokenizedSecurity"])
 
-# === Participants (buyers get TCASH, sellers get TSEC) ===
-accounts = [
-    {"role": "buyer", "address": "0x59b5D0A361b6Cd8Cc22e21bE74f2Dc387f75E9A6"},
-    {"role": "buyer", "address": "0xd9f64a61E2F822B6aF88ffb34C436D9A600A2De9"},
-    {"role": "seller", "address": "0xA5F05C523aF62ea507a90E78605e2a1796B2c801"},
-    {"role": "seller", "address": "0x264B3334C9e6997534ccd403099eD8BFC43fb3F9"},
-]
+# === Load participants from file ===
+with open("participants.json", "r") as f:
+    accounts = json.load(f)
 
 # === Admin ===
 ADMIN_PRIVATE_KEY = "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"

@@ -25,10 +25,10 @@ sec = w3.eth.contract(address=TOKENIZED_SEC, abi=abi_sec)
 # === Step 1: Generate Accounts ===
 participants = []
 
-for i in range(4):
+for i in range(100):
     acct = w3.eth.account.create()
     participants.append({
-        "role": "buyer" if i < 2 else "seller",
+        "role": "buyer" if i < 50 else "seller",
         "address": acct.address,
         "private_key": acct.key.hex()
     })
@@ -36,7 +36,7 @@ for i in range(4):
 with open("participants.json", "w") as f:
     json.dump(participants, f, indent=2)
 
-print("✅ Generated 2 buyers and 2 sellers.")
+print("✅ Generated 50 buyers and 50 sellers.")
 print("📄 Saved to participants.json")
 
 # === Step 2: Fund Each ===
