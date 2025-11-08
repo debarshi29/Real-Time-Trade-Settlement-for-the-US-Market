@@ -1,0 +1,77 @@
+docker network create besu-net
+
+docker run -d --network besu-net `
+  -p 8545:8545 -p 8546:8546 -p 30303:30303 `
+  -v "C:/Users/DEBARSHI/Documents/Programs/Trade Settlement/src/besu-network/genesis.json:/besu/genesis.json" `
+  -v "C:/Users/DEBARSHI/Documents/Programs/Trade Settlement/src/besu-network/node1/data:/besu/node1/data" `
+  -v "C:\Users\DEBARSHI\Documents\Programs\Trade Settlement\src\besu-network\node1\data\key" `
+  --name besu-node1 `
+  hyperledger/besu:latest `
+  --data-path=/besu/node1/data `
+  --genesis-file=/besu/genesis.json `
+  --network-id=1337 `
+  --rpc-http-enabled `
+  --rpc-http-api=ETH,NET,CLIQUE,DEBUG,MINER,WEB3,ADMIN `
+  --rpc-http-host=0.0.0.0 `
+  --rpc-http-port=8545 `
+  --rpc-http-cors-origins="*" `
+  --rpc-ws-enabled `
+  --rpc-ws-api=ETH,NET,CLIQUE,DEBUG,MINER,WEB3,ADMIN `
+  --rpc-ws-host=0.0.0.0 `
+  --rpc-ws-port=8546 `
+  --p2p-port=30303 `
+  --p2p-enabled=true `
+  --min-gas-price=0 `
+  --host-allowlist="*"
+
+docker run -d --network besu-net `
+  -p 8547:8547 -p 8548:8548 -p 30304:30304 `
+  -v "C:/Users/DEBARSHI/Documents/Programs/Trade Settlement/src/besu-network/genesis.json:/besu/genesis.json" `
+  -v "C:/Users/DEBARSHI/Documents/Programs/Trade Settlement/src/besu-network/node2/data:/besu/node2/data" `
+  --name besu-node2 `
+  hyperledger/besu:latest `
+  --data-path=/besu/node2/data `
+  --genesis-file=/besu/genesis.json `
+  --network-id=1337 `
+  --rpc-http-enabled `
+  --rpc-http-api=ETH,NET,CLIQUE,DEBUG,MINER,WEB3,ADMIN `
+  --rpc-http-host=0.0.0.0 `
+  --rpc-http-port=8547 `
+  --rpc-http-cors-origins="*" `
+  --rpc-ws-enabled `
+  --rpc-ws-api=ETH,NET,CLIQUE,DEBUG,MINER,WEB3,ADMIN `
+  --rpc-ws-host=0.0.0.0 `
+  --rpc-ws-port=8548 `
+  --p2p-port=30304 `
+  --p2p-enabled=true `
+  --bootnodes=enode://df7f70b86166ece9c6cf634a10cc98d327b2545abe3b75b7420e4a2c977a2e0625a980fc6c512fa69e5f40fd43dfb539f79f6d486871b4a5b21104592dbd22ee@172.18.0.2:30303 `
+  --min-gas-price=0 `
+  --sync-min-peers=1 `
+  --host-allowlist="*"
+
+
+docker run -d --network besu-net `
+  -p 8549:8549 -p 8550:8550 -p 30305:30305 `
+  -v "C:/Users/DEBARSHI/Documents/Programs/Trade Settlement/src/besu-network/genesis.json:/besu/genesis.json" `
+  -v "C:/Users/DEBARSHI/Documents/Programs/Trade Settlement/src/besu-network/node3/data:/besu/node3/data" `
+  --name besu-node3 `
+  hyperledger/besu:latest `
+  --data-path=/besu/node3/data `
+  --genesis-file=/besu/genesis.json `
+  --network-id=1337 `
+  --rpc-http-enabled `
+  --rpc-http-api=ETH,NET,CLIQUE,DEBUG,MINER,WEB3,ADMIN `
+  --rpc-http-host=0.0.0.0 `
+  --rpc-http-port=8549 `
+  --rpc-http-cors-origins="*" `
+  --rpc-ws-enabled `
+  --rpc-ws-api=ETH,NET,CLIQUE,DEBUG,MINER,WEB3,ADMIN `
+  --rpc-ws-host=0.0.0.0 `
+  --rpc-ws-port=8550 `
+  --p2p-port=30305 `
+  --p2p-enabled=true `
+  --bootnodes=enode://df7f70b86166ece9c6cf634a10cc98d327b2545abe3b75b7420e4a2c977a2e0625a980fc6c512fa69e5f40fd43dfb539f79f6d486871b4a5b21104592dbd22ee@172.18.0.2:30303 `
+  --min-gas-price=0 `
+  --sync-min-peers=1 `
+  --host-allowlist="*"
+

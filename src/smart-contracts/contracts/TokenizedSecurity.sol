@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract TokenizedSecurity is IERC20, AccessControl {
-    string public constant name = "TokenizedSecurity";
-    string public constant symbol = "TSEC";
+    string public name;
+    string public symbol;
     uint8 public constant decimals = 18;
 
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
@@ -17,7 +17,13 @@ contract TokenizedSecurity is IERC20, AccessControl {
     mapping(address => mapping(address => uint256)) private _allowances;
     mapping(address => bool) private _blacklisted;
 
-    constructor(uint256 initialSupply) {
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint256 initialSupply
+    ) {
+        name = _name;
+        symbol = _symbol;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ISSUER_ROLE, msg.sender);
         _mint(msg.sender, initialSupply * 1e18);
@@ -86,7 +92,6 @@ contract TokenizedSecurity is IERC20, AccessControl {
         return _blacklisted[user];
     }
 
-    // ✅ No override — just check and use manually
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal view {
         require(!_blacklisted[from] && !_blacklisted[to], "Blacklisted");
     }

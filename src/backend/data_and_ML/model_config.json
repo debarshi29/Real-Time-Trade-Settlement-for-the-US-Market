@@ -1,0 +1,35 @@
+{
+  "threshold": 0.2,
+  "feature_names": [
+    "trade_size",
+    "trade_price",
+    "trade_value",
+    "market_price",
+    "price_deviation_pct",
+    "rolling_volatility",
+    "market_trend",
+    "buyer_balance_ratio",
+    "seller_balance_ratio",
+    "trade_frequency",
+    "attempted_manip",
+    "hour",
+    "weekday",
+    "counterparty_repeat"
+  ],
+  "feature_count": 14,
+  "model_params": {
+    "n_estimators": 200,
+    "max_depth": 10,
+    "min_samples_leaf": 10,
+    "class_weight": "balanced_subsample"
+  },
+  "expected_performance": {
+    "roc_auc": 0.7404,
+    "fraud_detection_rate": 0.981,
+    "false_positive_rate": 0.47
+  },
+  "cost_parameters": {
+    "false_positive_cost": 10,
+    "false_negative_cost": 1000
+  }
+}
